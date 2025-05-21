@@ -113,6 +113,8 @@ public function actionView($IP)
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'IP' => $model->IP]);
         }
+            Yii::$app->session->setFlash('highlightId', $model->IP);
+
     return $this->render('update', [
         'model' => $model,
     ]);
@@ -122,9 +124,12 @@ public function actionToggleStatus($IP) {
     $model = $this->findModel($IP);
     $model->status = $model->status == 1 ? 0 : 1;
     $model->save(false);
+    Yii::$app->session->setFlash('highlightId', $model->IP);
+
     Yii::$app->session->setFlash('success', 'Το status άλλαξε.');
     return $this->redirect(['index']);
 }
+
 
 
     /**

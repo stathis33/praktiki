@@ -13,6 +13,11 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
+       'session' => [
+         'class' => 'yii\web\Session',
+         'cookieParams' => ['httponly' => true, 'lifetime' => 3600*24*30],
+         'timeout' => 3600*24*30,
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'nXwCL1UWNyWOD0Y96e3Pf8ncaQVgk9hl',
@@ -21,8 +26,8 @@ $config = [
             'class' => 'yii\caching\FileCache',
         ],
         'user' => [
-            'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+            'identityClass' => 'app\models\LdapIdentity',
+            'enableAutoLogin' => false,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',

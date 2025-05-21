@@ -4,7 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\base\Model;
-
+use app\models\LdapIdentity;
 /**
  * LoginForm is the model behind the login form.
  *
@@ -42,28 +42,36 @@ class LoginForm extends Model
      * @param string $attribute the attribute currently being validated
      * @param array $params the additional name-value pairs given in the rule
      */
-    public function validatePassword($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            $user = $this->getUser();
+    public function validatePassword($attribute, $params, $validator)
+{
+    if (!$this->hasErrors()) {
+        $ldapconn = ldap_connect("localhost", 389);
 
-            if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect username or password.');
-            }
+        ldap_set_option($ldapconn, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($ldapconn, LDAP_OPT_REFERRALS, 0);
+
+        $dn = "uid={$this->username},ou=users,dc=secproject,dc=gr";
+
+        if (!@ldap_bind($ldapconn, $dn, $this->password)) {
+            $this->addError($attribute, 'Λανθασμένα στοιχεία σύνδεσης.');
         }
     }
+}
 
     /**
      * Logs in a user using the provided username and password.
      * @return bool whether the user is logged in successfully
      */
-    public function login()
-    {
-        if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
-        }
-        return false;
+   public function login()
+{
+    $user = LdapIdentity::findByUsername($this->username);
+    if ($user && $user->validatePassword($this->password)) {
+        return Yii::$app->user->login($user);
     }
+
+    $this->addError('password', 'Λανθασμένα LDAP στοιχεία.');
+    return false;
+}
 
     /**
      * Finds user by [[username]]

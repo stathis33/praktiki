@@ -25,11 +25,18 @@ $this->params['breadcrumbs'][] = $this->title;
     
     </p>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
+    <?php // echo $this->render('_search', ['model' => $searchModel]); 
+$highlightId = Yii::$app->session->getFlash('highlightId');?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => function ($model) use ($highlightId) {
+        if ($highlightId && $model->IP === $highlightId) {
+            return ['class' => 'highlighted-row'];
+        }
+        return []; 
+        
+        },
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
@@ -75,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => 'btn btn-sm btn-warning',
                 'data-method' => 'post',
-                'data-confirm' => 'Θέλεις να αλλάξεις το status;',
+                'data-confirm' => 'Θέλεις να αλλάξεις το status της    ' . $model -> IP . ';',
             ]
         );
     },
@@ -104,5 +111,12 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     <?php endif; ?>
 <?php endforeach; ?>
-
+<?php
+$this->registerCss(<<<CSS
+    .highlighted-row {
+        background-color: #d1f7c4 !important;
+        transition: background-color 0.5s ease;
+    }
+CSS);
+?>
 </div>
